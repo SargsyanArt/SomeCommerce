@@ -37,7 +37,7 @@ namespace SomeCommerce.Web.Controllers
 
             IQueryable<Agreement> query = _dbContext.Agreements
                         .Where(a => a.UserId == userId
-                        && model.search == null || string.IsNullOrEmpty(model.search.value) ? true : a.Product.Description.Contains(model.search.value));
+                        && model.search == null || string.IsNullOrEmpty(model.search.value) ? true : a.Product.Description.StartsWith(model.search.value));
 
             List<AgreementModel> agreements = await query
                         .Skip(model.start)

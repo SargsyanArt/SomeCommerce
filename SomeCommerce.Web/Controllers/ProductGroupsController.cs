@@ -28,15 +28,12 @@ namespace SomeCommerce.Web.Controllers
 
         // GET: ProductGroups
         [Route("/[controller]/")]
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.ProductGroups.ToListAsync());
-        }
+        public IActionResult Index() => View();
 
         public async Task<JsonResult> Get(DataTableAjaxPostModel model)
         {
             IQueryable<ProductGroup> query = _context.ProductGroups
-                        .Where(a => model.search == null || string.IsNullOrEmpty(model.search.value) ? true : a.Description.Contains(model.search.value));
+                        .Where(pg => model.search == null || string.IsNullOrEmpty(model.search.value) || pg.Description.StartsWith(model.search.value));
 
             List<ProductGroupModel> productGroups = await query
                         .Skip(model.start)
@@ -69,14 +66,14 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            var productGroup = await _context.ProductGroups
+            ProductGroup productGroup = await _context.ProductGroups
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (productGroup == null)
             {
                 return NotFound();
             }
 
-            return View(productGroup);
+            return View(_mapper.Map<ProductGroupModel>(productGroup));
         }
 
         // GET: ProductGroups/Create
@@ -90,11 +87,11 @@ namespace SomeCommerce.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Description,Code,Active")] ProductGroup productGroup)
+        public async Task<IActionResult> Create([Bind("Id,Description,Code,Active")] ProductGroupModel productGroup)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(productGroup);
+                _context.Add(_mapper.Map<ProductGroup>(productGroup));
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -110,12 +107,12 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            var productGroup = await _context.ProductGroups.FindAsync(id);
+            ProductGroup productGroup = await _context.ProductGroups.FindAsync(id);
             if (productGroup == null)
             {
                 return NotFound();
             }
-            return View(productGroup);
+            return View(_mapper.Map<ProductGroupModel>(productGroup));
         }
 
         // POST: ProductGroups/Edit/5
@@ -123,7 +120,7 @@ namespace SomeCommerce.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Code,Active")] ProductGroup productGroup)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Code,Active")] ProductGroupModel productGroup)
         {
             if (id != productGroup.Id)
             {
@@ -134,7 +131,7 @@ namespace SomeCommerce.Web.Controllers
             {
                 try
                 {
-                    _context.Update(productGroup);
+                    _context.Update(_mapper.Map<ProductGroup>(productGroup));
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -162,14 +159,14 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            var productGroup = await _context.ProductGroups
+            ProductGroup productGroup = await _context.ProductGroups
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (productGroup == null)
             {
                 return NotFound();
             }
 
-            return View(productGroup);
+            return View(_mapper.Map<ProductGroupModel>(productGroup));
         }
 
         // POST: ProductGroups/Delete/5
@@ -178,7 +175,7 @@ namespace SomeCommerce.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var productGroup = await _context.ProductGroups.FindAsync(id);
+            ProductGroup productGroup = await _context.ProductGroups.FindAsync(id);
             _context.ProductGroups.Remove(productGroup);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
