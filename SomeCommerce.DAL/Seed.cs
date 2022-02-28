@@ -51,6 +51,16 @@ namespace SomeCommerce.DAL
                         {
                             Active = true,
                             Description = "Fresh"
+                        },
+                        new()
+                        {
+                            Active = true,
+                            Description = "Grocery"
+                        },
+                        new()
+                        {
+                            Active = true,
+                            Description = "Car Parts"
                         }
                     };
                     dbContext.ProductGroups.AddRange(groups);
@@ -81,6 +91,13 @@ namespace SomeCommerce.DAL
                         {
                             Active = true,
                             Description = "Power Bank",
+                            Price = 0.98m,
+                            ProductGroupId = firstGroupId
+                        },
+                        new()
+                        {
+                            Active = true,
+                            Description = "USB Cable",
                             Price = 0.98m,
                             ProductGroupId = firstGroupId
                         }
