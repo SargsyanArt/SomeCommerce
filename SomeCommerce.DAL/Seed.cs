@@ -12,6 +12,7 @@ namespace SomeCommerce.DAL
         //is hardcoded just for simplicity
         private const string DefaultUsername = "vladica@ognjanovic.com";
         private const string PasswordPlainText = "password";
+
         public static async void EnsureSeedData(IServiceProvider services)
         {
             using IServiceScope scope = services.GetRequiredService<IServiceScopeFactory>().CreateScope();
@@ -39,19 +40,16 @@ namespace SomeCommerce.DAL
                         new()
                         {
                             Active = true,
-                            Code = Guid.NewGuid(),
                             Description = "Electronics"
                         },
                         new()
                         {
                             Active = true,
-                            Code = Guid.NewGuid(),
                             Description = "Pharmacy"
                         },
                         new()
                         {
                             Active = true,
-                            Code = Guid.NewGuid(),
                             Description = "Fresh"
                         }
                     };
@@ -69,7 +67,6 @@ namespace SomeCommerce.DAL
                         {
                             Active = true,
                             Description = "Mobile phone",
-                            Number = Guid.NewGuid(),
                             Price = 12.99m,
                             ProductGroupId = firstGroupId
                         },
@@ -77,16 +74,14 @@ namespace SomeCommerce.DAL
                         {
                             Active = true,
                             Description = "Wireless charger",
-                            Number = Guid.NewGuid(),
-                            Price = 12.99m,
+                            Price = 10.99m,
                             ProductGroupId = firstGroupId
                         },
                         new()
                         {
                             Active = true,
                             Description = "Power Bank",
-                            Number = Guid.NewGuid(),
-                            Price = 12.99m,
+                            Price = 0.98m,
                             ProductGroupId = firstGroupId
                         }
                     };

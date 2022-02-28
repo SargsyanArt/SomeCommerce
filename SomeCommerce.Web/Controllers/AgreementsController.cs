@@ -35,7 +35,7 @@ namespace SomeCommerce.Web.Controllers
         {
             int userId = int.Parse(_userManager.GetUserId(User));
 
-            IQueryable<Agreement> query = _dbContext.Aggreements
+            IQueryable<Agreement> query = _dbContext.Agreements
                         .Where(a => a.UserId == userId
                         && model.search == null || string.IsNullOrEmpty(model.search.value) ? true : a.Product.Description.Contains(model.search.value));
 
@@ -85,7 +85,7 @@ namespace SomeCommerce.Web.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var count = ModelState.ErrorCount;
-            Agreement agreement = await _dbContext.Aggreements.Select(a => new Agreement
+            Agreement agreement = await _dbContext.Agreements.Select(a => new Agreement
             {
                 Id = a.Id,
                 EffectiveDate = a.EffectiveDate,
@@ -142,7 +142,7 @@ namespace SomeCommerce.Web.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            Agreement agreement = await _dbContext.Aggreements.FindAsync(id);
+            Agreement agreement = await _dbContext.Agreements.FindAsync(id);
             if(agreement != null)
             {
                 _dbContext.Remove(agreement);

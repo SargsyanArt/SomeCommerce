@@ -12,8 +12,8 @@ using SomeCommerce.DAL.Data;
 namespace SomeCommerce.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220228081301_ChangeSet01")]
-    partial class ChangeSet01
+    [Migration("20220228130707_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -194,7 +194,7 @@ namespace SomeCommerce.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Aggreements");
+                    b.ToTable("Agreements");
                 });
 
             modelBuilder.Entity("SomeCommerce.Core.Entities.Product", b =>
@@ -209,10 +209,12 @@ namespace SomeCommerce.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("Number")
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(19,4)");
@@ -221,6 +223,13 @@ namespace SomeCommerce.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Description");
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("Description"), false);
+
+                    b.HasIndex("Number")
+                        .IsUnique();
 
                     b.HasIndex("ProductGroupId");
 
@@ -239,12 +248,21 @@ namespace SomeCommerce.DAL.Migrations
                         .HasColumnType("bit");
 
                     b.Property<Guid>("Code")
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("Description");
+
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("Description"), false);
 
                     b.ToTable("ProductGroups");
                 });
@@ -375,7 +393,7 @@ namespace SomeCommerce.DAL.Migrations
                         .HasForeignKey("ProductGroupId");
 
                     b.HasOne("SomeCommerce.Core.Entities.Product", "Product")
-                        .WithMany()
+                        .WithMany("Agreements")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -402,6 +420,11 @@ namespace SomeCommerce.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("ProductGroup");
+                });
+
+            modelBuilder.Entity("SomeCommerce.Core.Entities.Product", b =>
+                {
+                    b.Navigation("Agreements");
                 });
 
             modelBuilder.Entity("SomeCommerce.Core.Entities.ProductGroup", b =>

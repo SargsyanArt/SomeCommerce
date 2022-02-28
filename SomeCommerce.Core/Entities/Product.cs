@@ -12,6 +12,8 @@ namespace SomeCommerce.Core.Entities
         public int ProductGroupId { get; set; }
         public ProductGroup ProductGroup { get; set; }
         public string Description { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public Guid Number { get; set; }
 
         [Column(TypeName = "decimal(19,4)")]

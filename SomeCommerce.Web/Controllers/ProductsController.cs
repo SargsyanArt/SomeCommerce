@@ -215,7 +215,7 @@ namespace SomeCommerce.Web.Controllers
         {
             term = term?.ToLower();
             List<Product> products = await _context.Products
-                .Where(p => string.IsNullOrEmpty(term) || p.Description.ToLower().Contains(term))
+                .Where(p => string.IsNullOrEmpty(term) || p.Description.StartsWith(term))
                 .Take(Dropdown.DefaultCapacity)
                 .Select(p => new Product
                 {

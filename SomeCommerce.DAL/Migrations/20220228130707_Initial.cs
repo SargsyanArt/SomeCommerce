@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SomeCommerce.DAL.Migrations
 {
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -56,8 +56,8 @@ namespace SomeCommerce.DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Code = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Code = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     Active = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -111,8 +111,8 @@ namespace SomeCommerce.DAL.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -156,8 +156,8 @@ namespace SomeCommerce.DAL.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -178,8 +178,8 @@ namespace SomeCommerce.DAL.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductGroupId = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Number = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Number = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     Price = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
                     Active = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -195,13 +195,14 @@ namespace SomeCommerce.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Aggreements",
+                name: "Agreements",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductGroupId = table.Column<int>(type: "int", nullable: true),
                     EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ProductPrice = table.Column<decimal>(type: "decimal(19,4)", nullable: false),
@@ -209,15 +210,20 @@ namespace SomeCommerce.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Aggreements", x => x.Id);
+                    table.PrimaryKey("PK_Agreements", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Aggreements_AspNetUsers_UserId",
+                        name: "FK_Agreements_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Aggreements_Products_ProductId",
+                        name: "FK_Agreements_ProductGroups_ProductGroupId",
+                        column: x => x.ProductGroupId,
+                        principalTable: "ProductGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Agreements_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -225,13 +231,18 @@ namespace SomeCommerce.DAL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Aggreements_ProductId",
-                table: "Aggreements",
+                name: "IX_Agreements_ProductGroupId",
+                table: "Agreements",
+                column: "ProductGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agreements_ProductId",
+                table: "Agreements",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Aggreements_UserId",
-                table: "Aggreements",
+                name: "IX_Agreements_UserId",
+                table: "Agreements",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -274,6 +285,30 @@ namespace SomeCommerce.DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProductGroups_Code",
+                table: "ProductGroups",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductGroups_Description",
+                table: "ProductGroups",
+                column: "Description")
+                .Annotation("SqlServer:Clustered", false);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_Description",
+                table: "Products",
+                column: "Description")
+                .Annotation("SqlServer:Clustered", false);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_Number",
+                table: "Products",
+                column: "Number",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Products_ProductGroupId",
                 table: "Products",
                 column: "ProductGroupId");
@@ -282,7 +317,7 @@ namespace SomeCommerce.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Aggreements");
+                name: "Agreements");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");

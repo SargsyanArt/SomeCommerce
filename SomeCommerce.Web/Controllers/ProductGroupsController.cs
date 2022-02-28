@@ -158,7 +158,7 @@ namespace SomeCommerce.Web.Controllers
         {
             term = term?.ToLower();
             List<Dropdown.Option> productGroups = await _context.ProductGroups
-                .Where(p => string.IsNullOrEmpty(term) || p.Description.ToLower().Contains(term))
+                .Where(p => string.IsNullOrEmpty(term) || p.Description.StartsWith(term))
                 .Take(Dropdown.DefaultCapacity)
                 .Select(p => new Dropdown.Option(p.Id.ToString(), p.Description))
                 .ToListAsync();
