@@ -12,8 +12,8 @@ using SomeCommerce.DAL.Data;
 namespace SomeCommerce.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220228130707_Initial")]
-    partial class Initial
+    [Migration("20220228134819_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SomeCommerce.Core.Entities;
@@ -15,15 +13,11 @@ namespace SomeCommerce.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly UserManager<SomeUser> _userManager;
         private readonly ApplicationDbContext _dbContext;
-        private readonly IMapper _mapper;
 
-        public HomeController(UserManager<SomeUser> userManager, ApplicationDbContext dbContext, IMapper mapper)
+        public HomeController(ApplicationDbContext dbContext)
         {
-            _userManager = userManager;
             _dbContext = dbContext;
-            _mapper = mapper;
         }
 
         [Route("/")]

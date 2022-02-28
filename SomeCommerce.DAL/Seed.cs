@@ -18,22 +18,26 @@ namespace SomeCommerce.DAL
             using IServiceScope scope = services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
             using UserManager<SomeUser> _userManager = scope.ServiceProvider.GetRequiredService<UserManager<SomeUser>>();
-            if ((await _userManager.FindByNameAsync(DefaultUsername)) is null)
+            using ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            if (context != null)
             {
-                SomeUser adminUser = new()
+                // migrate any database changes on startup (includes initial db creation)
+                context.Database.Migrate();
+
+                if ((await _userManager.FindByNameAsync(DefaultUsername)) is null)
                 {
-                    UserName = DefaultUsername,
-                    Email = DefaultUsername,
-                    EmailConfirmed = true
-                };
+                    SomeUser adminUser = new()
+                    {
+                        UserName = DefaultUsername,
+                        Email = DefaultUsername,
+                        EmailConfirmed = true
+                    };
 
-                await _userManager.CreateAsync(adminUser, PasswordPlainText);
-            }
+                    await _userManager.CreateAsync(adminUser, PasswordPlainText);
+                }
 
-            using ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            if (dbContext != null)
-            {
-                if (!await dbContext.ProductGroups.AnyAsync())
+                if (!await context.ProductGroups.AnyAsync())
                 {
                     List<ProductGroup> groups = new()
                     {
@@ -63,27 +67,27 @@ namespace SomeCommerce.DAL
                             Description = "Car Parts"
                         }
                     };
-                    dbContext.ProductGroups.AddRange(groups);
-                    await dbContext.SaveChangesAsync();
+                    context.ProductGroups.AddRange(groups);
+                    await context.SaveChangesAsync();
                 }
 
-                if (!dbContext.Products.Any())
+                if (!context.Products.Any())
                 {
-                    int firstGroupId = (await dbContext.ProductGroups.FirstAsync()).Id;
+                    int firstGroupId = (await context.ProductGroups.FirstAsync()).Id;
 
                     List<Product> products = new()
                     {
                         new()
                         {
                             Active = true,
-                            Description = "Mobile phone",
+                            Description = "Mobile Phone",
                             Price = 12.99m,
                             ProductGroupId = firstGroupId
                         },
                         new()
                         {
                             Active = true,
-                            Description = "Wireless charger",
+                            Description = "Wireless Charger",
                             Price = 10.99m,
                             ProductGroupId = firstGroupId
                         },
@@ -102,9 +106,10 @@ namespace SomeCommerce.DAL
                             ProductGroupId = firstGroupId
                         }
                     };
-                    dbContext.Products.AddRange(products);
-                    await dbContext.SaveChangesAsync();
+                    context.Products.AddRange(products);
+                    await context.SaveChangesAsync();
                 }
+
             }
         }
     }

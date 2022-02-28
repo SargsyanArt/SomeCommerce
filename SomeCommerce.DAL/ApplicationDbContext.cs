@@ -13,6 +13,14 @@ namespace SomeCommerce.DAL.Data
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            //Performance Diagnosis https://docs.microsoft.com/en-us/ef/core/performance/performance-diagnosis?tabs=simple-logging%2Cload-entities
+            //optionsBuilder
+            //    .UseSqlServer(_configuration.GetConnectionString("DefaultConnection"))
+            //    .LogTo(Console.WriteLine, LogLevel.Information);
+        }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Product>().Property(p => p.Number)
