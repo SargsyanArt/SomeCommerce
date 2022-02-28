@@ -1,0 +1,98 @@
+﻿@model AgreementModel
+
+<h4>Agreement</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Save">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="ProductPrice" />
+              <div class="form-group">
+                <label asp-for="ProductGroupId" class="control-label"></label>
+                <select asp-for="ProductGroupId" class="form-control" style="width: 100%" asp-items="Model.AllProductGroups"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductId" class="control-label"></label>
+                <select asp-for="ProductId" class="form-control" style="width: 100%" asp-items="Model.AllProducts"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="EffectiveDate" class="control-label"></label>
+                <input asp-for="EffectiveDate" class="form-control" />
+                <span asp-validation-for="EffectiveDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpirationDate" class="control-label"></label>
+                <input asp-for="ExpirationDate" class="form-control" />
+                <span asp-validation-for="ExpirationDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NewPrice" class="control-label">
+                    @Html.DisplayNameFor(modelitem => modelitem.NewPrice) (@Html.DisplayNameFor(modelitem => modelitem.ProductPrice): 
+                    <b>@Html.DisplayFor(modelitem => modelitem.ProductPrice)</b>)
+                </label>
+                <input asp-for="NewPrice" class="form-control" />
+                <span asp-validation-for="NewPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-controller="Home">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+            $("select[name='@nameof(Model.ProductId)']").select2({
+              ajax: {
+                delay: 200, //wait a bit to eliminate some unnecessary requests
+                cache: true,
+                url: '/Products/GetSelectBox',
+                type: "post",
+                data: function (params) {
+                  var query = {
+                    term: params.term
+                  }
+                  return query;
+                },
+                processResults: function (results) {
+                    return {
+                        results
+                    };
+                },
+                closeOnSelect: true,
+                placeholder: "Select Product",
+                allowClear: true,
+              }
+            });
+
+            $("select[name='@nameof(Model.ProductGroupId)']").select2({
+              ajax: {
+                delay: 200, //wait a bit to eliminate some unnecessary requests
+                cache: true,
+                url: '/ProductGroups/GetSelectBox',
+                type: "post",
+                data: function (params) {
+                  var query = {
+                    term: params.term
+                  }
+                  return query;
+                },
+                processResults: function (results) {
+                    return {
+                        results
+                    };
+                },
+                closeOnSelect: true,
+                placeholder: "Select Product Group",
+                allowClear: true,
+              }
+            });
+            </script>
+}

@@ -1,0 +1,40 @@
+﻿@model AgreementModel
+
+<form asp-action="Create" asp-controller="Agreements">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="ProductGroupId" class="control-label"></label>
+        <select asp-for="ProductGroupId" class="form-control" style="width: 100%" asp-items="Model.AllProductGroups"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="ProductId" class="control-label"></label>
+        <select asp-for="ProductId" class="form-control" style="width: 100%" asp-items="Model.AllProducts"></select>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <label asp-for="EffectiveDate" class="control-label"></label>
+            <input asp-for="EffectiveDate" pattern="dd/MM/yyyy" class="form-control" />
+            <span asp-validation-for="EffectiveDate" class="text-danger"></span>
+        </div>
+        <div class="col">
+            <label asp-for="ExpirationDate" class="control-label"></label>
+            <input asp-for="ExpirationDate" pattern="dd/MM/yyyy" class="form-control" />
+            <span asp-validation-for="ExpirationDate" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col">
+            <label asp-for="ProductPrice" class="control-label"></label>
+            <input asp-for="ProductPrice" class="form-control" readonly />
+            <span asp-validation-for="ProductPrice" class="text-danger"></span>
+        </div>
+        <div class="col">
+             <label asp-for="NewPrice"></label>
+            <input asp-for="NewPrice" class="form-control" />
+            <span asp-validation-for="NewPrice" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="text-right">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>

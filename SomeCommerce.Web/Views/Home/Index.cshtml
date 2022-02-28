@@ -1,0 +1,156 @@
+﻿@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="row mb-2">
+        <div class="col-12 text-right">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#aggreementModal">New Aggreement</button>
+        </div>
+    </div>
+
+    <table id="agreementsTable" class="display">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.User)</th>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.ProductGroup.Code)</th>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.Product.Number)</th>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.EffectiveDate)</th>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.ExpirationDate)</th>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.ProductPrice)</th>
+                <th>@Html.DisplayNameFor(modelItem => Model.Agreement.NewPrice)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="aggreementModal" tabindex="-1" role="dialog" aria-labelledby="agreementModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New Aggreement</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <partial name="Partials/AddAgreement" model="Model.Agreement">
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Dare to <a asp-area="Identity" asp-page="/Account/Login">login</a> in order to see some data here.</p>
+    </div>
+}
+@section Scripts
+{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready( function () {
+
+            //example https://ashishontech.xyz/server-side-pagination-jquery-datatable/
+            if($('#agreementsTable').length){
+                $('#agreementsTable').DataTable({
+                    proccessing: true,    // shows loading image while fetchi
+                    serverSide: true,     // activates server side pagination
+                    ajax: {
+                      url: "/Agreements/GetAgreements",
+                      type: 'POST',
+                      dataSrc: function ( json ) {
+                        json.data.forEach(element => 
+                           { 
+                                element.productNumber = `<span title="${element.productDescription}">${element.productNumber}</span>`;
+                                element.productGroupCode = `<span title="${element.productGroupDescription}">${element.productGroupCode}</span>`;
+                                element.actions =
+                                `<div class='row'>
+                                    <a class='btn btn-sm btn-danger' href='/Agreements/Delete/${element.agreementId}'><i class='fa fa-trash' aria-hidden='true'></i></a>&nbsp;
+                                    <a class='btn btn-sm btn-primary' href='/Agreements/Edit/${element.agreementId}'><i class="fas fa-edit"></i></a>
+                                </div>`;
+                           }
+                        );
+                        return json.data;
+                    },
+                      data: function(results){
+                          //console.log(results);
+                          //results.columns.forEach(element => console.log(element));
+                      }
+                    },
+                    columns: [
+                        { data: "user" },
+                        { data: "productGroupCode" },
+                        { data: "productNumber" },
+                        { data: "effectiveDate" },
+                        { data: "expirationDate" },
+                        { data: "productPrice" },
+                        { data: "newPrice" },
+                        { data: "actions" },
+                    ]
+                });
+            }
+
+            $("select[name='@nameof(Model.Agreement.ProductId)']").change(function(){
+                if($(this).val().length){
+                    $.get( "/Products/GetProductPrice/" + $(this).val(), function(result) {
+                        $("input[name='@nameof(Model.Agreement.ProductPrice)']").val(result);
+                    });
+                }
+            });
+
+            $("select[name='@nameof(Model.Agreement.ProductId)']").select2({
+              ajax: {
+                delay: 200, //wait a bit to eliminate some unnecessary requests
+                cache: true,
+                url: '/Products/GetSelectBox',
+                type: "post",
+                data: function (params) {
+                  var query = {
+                    term: params.term
+                  }
+                  return query;
+                },
+                processResults: function (results) {
+                    return {
+                        results
+                    };
+                },
+                closeOnSelect: true,
+                placeholder: "Select Product",
+                allowClear: true,
+              }
+            });
+
+            $("select[name='@nameof(Model.Agreement.ProductGroupId)']").select2({
+              ajax: {
+                delay: 200, //wait a bit to eliminate some unnecessary requests
+                cache: true,
+                url: '/ProductGroups/GetSelectBox',
+                type: "post",
+                data: function (params) {
+                  var query = {
+                    term: params.term
+                  }
+                  return query;
+                },
+                processResults: function (results) {
+                    return {
+                        results
+                    };
+                },
+                closeOnSelect: true,
+                placeholder: "Select Product Group",
+                allowClear: true,
+              }
+            });
+        });
+    </script>
+}
