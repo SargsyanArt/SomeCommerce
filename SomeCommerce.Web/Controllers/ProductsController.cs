@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -28,13 +29,48 @@ namespace SomeCommerce.Web.Controllers
 
         // GET: Products1
         [Route("/[controller]/")]
-        public async Task<IActionResult> Index()
+        public IActionResult Index() => View();
+
+        public async Task<JsonResult> Get(DataTableAjaxPostModel model)
         {
-            var applicationDbContext = _context.Products.Include(p => p.ProductGroup);
-            return View(await applicationDbContext.ToListAsync());
+            IQueryable<Product> query = _context.Products
+                        .Where(pg => model.search == null || string.IsNullOrEmpty(model.search.value) || pg.Description.StartsWith(model.search.value));
+
+            List<Product> products = await query
+                        .Skip(model.start)
+                        .Take(model.length)
+                        .Select(p => new Product { 
+                            Id = p.Id,
+                            Active = p.Active,
+                            Description = p.Description,
+                            Number = p.Number,
+                            Price = p.Price,
+                            ProductGroupId = p.ProductGroupId,
+                            ProductGroup = new ProductGroup { 
+                                Description = p.ProductGroup.Description,
+                            }
+                        })
+                        .ToListAsync();
+
+            return Json(new
+            {
+                // this is what datatables wants sending back
+                model.draw,
+                recordsTotal = products.Count,
+                recordsFiltered = await query.CountAsync(),
+                data = products.Select(p => new
+                {
+                    id = p.Id,
+                    description = p.Description,
+                    productGroup = p.ProductGroup.Description,
+                    number = p.Number,
+                    price = p.Price.ToString("C2"),
+                    active = p.Active
+                })
+            });
         }
 
-        // GET: Products1/Details/5
+        [Route("{id?}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,7 +78,7 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
+            Product product = await _context.Products
                 .Include(p => p.ProductGroup)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
@@ -50,25 +86,22 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            return View(product);
+            return View(_mapper.Map<ProductModel>(product));
         }
 
         // GET: Products1/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: Products1/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProductGroupId,Description,Number,Price,Active")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,ProductGroupId,Description,Number,Price,Active")] ProductModel product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
+                _context.Add(_mapper.Map<Product>(product));
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -83,7 +116,7 @@ namespace SomeCommerce.Web.Controllers
             return View(product);
         }
 
-        // GET: Products1/Edit/5
+        [Route("{id?}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -91,7 +124,7 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
+            Product product = await _context.Products
                 .Where(p => p.Id == id)
                 .Select(p => new Product { 
                     Id = p.Id,
@@ -114,15 +147,15 @@ namespace SomeCommerce.Web.Controllers
                 new List<SelectListItem>{
                     new SelectListItem(product.ProductGroup.Description, product.ProductGroupId.ToString())
                 }, "Value", "Text");
-            return View(product);
+            return View(_mapper.Map<ProductModel>(product));
         }
 
         // POST: Products1/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ProductGroupId,Description,Number,Price,Active")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ProductGroupId,Description,Number,Price,Active")] ProductModel product)
         {
             if (id != product.Id)
             {
@@ -133,12 +166,12 @@ namespace SomeCommerce.Web.Controllers
             {
                 try
                 {
-                    _context.Update(product);
+                    _context.Update(_mapper.Map<Product>(product));
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
+                    if (!await ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -161,7 +194,7 @@ namespace SomeCommerce.Web.Controllers
             return View(product);
         }
 
-        // GET: Products1/Delete/5
+        [Route("{id?}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -169,7 +202,7 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
+            Product product = await _context.Products
                 .Include(p => p.ProductGroup)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
@@ -177,24 +210,20 @@ namespace SomeCommerce.Web.Controllers
                 return NotFound();
             }
 
-            return View(product);
+            return View(_mapper.Map<ProductModel>(product));
         }
 
-        // POST: Products1/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("{id:int}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            Product product = await _context.Products.FindAsync(id);
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
-        }
+        private async Task<bool> ProductExists(int id) => await _context.Products.AnyAsync(e => e.Id == id);
 
         [HttpGet("/[controller]/[action]/{productId:int}")]
         public async Task<ProductModel> GetProductDetails(int productId)
@@ -228,7 +257,7 @@ namespace SomeCommerce.Web.Controllers
                 }).ToListAsync();
 
             List<Dropdown.OptGroup> result = new();
-            foreach (var group in products.GroupBy(p => p.ProductGroup.Description))
+            foreach (IGrouping<string, Product> group in products.GroupBy(p => p.ProductGroup.Description))
             {
                 result.Add(new Dropdown.OptGroup(group.Key, group.Select(g => new Dropdown.Option(g.Id.ToString(), g.Description))));
             }

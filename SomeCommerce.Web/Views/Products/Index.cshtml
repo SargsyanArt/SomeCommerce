@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SomeCommerce.Core.Entities.Product>
+﻿@model IEnumerable<ProductModel>
 
 @{
     ViewData["Title"] = "Products";
@@ -10,14 +10,14 @@
     <p>
         <a asp-action="Create">Create New</a>
     </p>
-    <table class="table">
+    <table id="productsTable" class="display table">
         <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.ProductGroupId)
+                    @Html.DisplayNameFor(model => model.Description)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Description)
+                    @Html.DisplayNameFor(model => model.ProductGroupId)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Number)
@@ -31,32 +31,48 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProductGroup.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Number)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Price)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Active)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-            }
-        </tbody>
+        <tbody></tbody>
     </table>
 </div>
+
+
+@section Scripts
+{
+<script>
+    //example https://ashishontech.xyz/server-side-pagination-jquery-datatable/
+    if($('table#productsTable').length){
+        $('table#productsTable').DataTable({
+            proccessing: true,    // shows loading image while fetchi
+            serverSide: true,     // activates server side pagination
+            ajax: {
+                url: "/Products/Get",
+                type: 'POST',
+                dataSrc: function ( json ) {
+                    console.log(json);
+                    json.data.forEach(element =>
+                        {
+                            element.actions =
+                            `<div class='row'>
+                                <div class='col text-right'>    
+                                    <a class='btn btn-sm btn-danger' href='/Products/Delete/${element.id}'><i class='fa fa-trash' aria-hidden='true'></i></a>&nbsp;
+                                    <a class='btn btn-sm btn-primary' href='/Products/Edit/${element.id}'><i class="fas fa-edit"></i></a>&nbsp;
+                                    <a class='btn btn-sm btn-success' href='/Products/Details/${element.id}'><i class="fas fa-info-circle"></i></a>
+                                </div>
+                            </div>`;
+                        }
+                    );
+                    return json.data;
+                },
+            },
+            columns: [
+                { data: "description" },
+                { data: "productGroup" },
+                { data: "number" },
+                { data: "price" },
+                { data: "active" },
+                { data: "actions" }
+            ]
+        });
+    }
+</script>
+}

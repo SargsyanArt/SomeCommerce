@@ -26,7 +26,6 @@ namespace SomeCommerce.Web.Controllers
             _mapper = mapper;
         }
 
-        // GET: ProductGroups
         [Route("/[controller]/")]
         public IActionResult Index() => View();
 
@@ -77,10 +76,7 @@ namespace SomeCommerce.Web.Controllers
         }
 
         // GET: ProductGroups/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: ProductGroups/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -98,7 +94,6 @@ namespace SomeCommerce.Web.Controllers
             return View(productGroup);
         }
 
-        // GET: ProductGroups/Edit/5
         [Route("{id?}")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -136,7 +131,7 @@ namespace SomeCommerce.Web.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductGroupExists(productGroup.Id))
+                    if (!await ProductGroupExists(productGroup.Id))
                     {
                         return NotFound();
                     }
@@ -150,7 +145,6 @@ namespace SomeCommerce.Web.Controllers
             return View(productGroup);
         }
 
-        // GET: ProductGroups/Delete/5
         [Route("{id?}")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -169,9 +163,7 @@ namespace SomeCommerce.Web.Controllers
             return View(_mapper.Map<ProductGroupModel>(productGroup));
         }
 
-        // POST: ProductGroups/Delete/5
-        [Route("{id:int}")]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("{id:int}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -181,10 +173,7 @@ namespace SomeCommerce.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductGroupExists(int id)
-        {
-            return _context.ProductGroups.Any(e => e.Id == id);
-        }
+        private async Task<bool> ProductGroupExists(int id) => await  _context.ProductGroups.AnyAsync(e => e.Id == id);
 
         [HttpPost("/[controller]/[action]")]
         public async Task<JsonResult> GetSelectBox(string term)
