@@ -1,47 +1,88 @@
 ﻿@model IEnumerable<SomeCommerce.Core.Entities.ProductGroup>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Product Groups";
 }
 
-<h1>Index</h1>
+<div class="tile">
+    <h1>@ViewData["Title"]</h1>
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+    <table id="productGroupsTable" class="display table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Active)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Active)
+                </td>
+                <td class="">
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Code)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Active)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Active)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@section Scripts
+{
+<script>
+    //example https://ashishontech.xyz/server-side-pagination-jquery-datatable/
+    if($('table#productGroupsTable').length){
+        $('table#productGroupsTable').DataTable({
+            proccessing: true,    // shows loading image while fetchi
+            serverSide: true,     // activates server side pagination
+            ajax: {
+                url: "/ProductGroups/Get",
+                type: 'POST',
+                dataSrc: function ( json ) {
+                    console.log(json);
+                    json.data.forEach(element =>
+                        {
+                            element.actions =
+                            `<div class='row'>
+                                <div class='col text-right'>    
+                                    <a class='btn btn-sm btn-danger' href='/ProductGroups/Delete/${element.id}'><i class='fa fa-trash' aria-hidden='true'></i></a>&nbsp;
+                                    <a class='btn btn-sm btn-primary' href='/ProductGroups/Details/${element.id}'><i class="fas fa-edit"></i></a>&nbsp;
+                                    <a class='btn btn-sm btn-success' href='/ProductGroups/Edit/${element.id}'><i class="fas fa-info-circle"></i></a>
+                                </div>
+                            </div>`;
+                        }
+                    );
+                    return json.data;
+                },
+            },
+            columns: [
+                { data: "description" },
+                { data: "code" },
+                { data: "active" },
+                { data: "actions" }
+            ]
+        });
+    }
+</script>
 }
-    </tbody>
-</table>

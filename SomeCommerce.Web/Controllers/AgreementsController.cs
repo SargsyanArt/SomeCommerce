@@ -31,7 +31,7 @@ namespace SomeCommerce.Web.Controllers
             _mapper = mapper;
         }
 
-        public async Task<JsonResult> GetAgreements(DataTableAjaxPostModel model)
+        public async Task<JsonResult> Get(DataTableAjaxPostModel model)
         {
             int userId = int.Parse(_userManager.GetUserId(User));
 

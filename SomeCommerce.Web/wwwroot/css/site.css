@@ -62,10 +62,77 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
+
+body, tr, .navbar-light .navbar-brand, .navbar-light .nav-link {
+    color: #727272 !important;
+}
+
+    body:not(header) {
+        background-color: #f1f1f1;
+    }
+
+.blurred-background-white, .modal-content {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.7) !important
+}
+
 .footer {
   position: absolute;
   bottom: 0;
   width: 100%;
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
+}
+
+.tile {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background-color: #fff !important;
+    transition: all .5s;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: .25rem;
+}
+
+    .tile:hover {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    }
+
+.tile-sm {
+    transition: all .5s;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+    .tile-sm > div:first-child {
+        border-top-left-radius: .25rem !important;
+        border-top-right-radius: .25rem !important;
+    }
+
+    .tile-sm > div:last-child {
+        border-bottom-right-radius: .25rem !important;
+        border-bottom-left-radius: .25rem !important;
+    }
+
+    .tile-sm:hover {
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+.tile-shadow-hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+    .tile-shadow-hover:hover {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    }
+
+.tile-shadow-hover-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+    .tile-shadow-hover-sm:hover {
+        box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+.tile.highlighted {
+    box-shadow: 0 0.25rem 5.5rem rgba(12, 74, 124, 1) !important;
 }

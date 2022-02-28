@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SomeCommerce.Core.Entities;
 using SomeCommerce.DAL.Data;
 using SomeCommerce.Web.Configuration;
+using SomeCommerce.Web.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,10 +18,12 @@ namespace SomeCommerce.Web.Controllers
     public class ProductGroupsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public ProductGroupsController(ApplicationDbContext context)
+        public ProductGroupsController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: ProductGroups
@@ -28,7 +33,35 @@ namespace SomeCommerce.Web.Controllers
             return View(await _context.ProductGroups.ToListAsync());
         }
 
+        public async Task<JsonResult> Get(DataTableAjaxPostModel model)
+        {
+            IQueryable<ProductGroup> query = _context.ProductGroups
+                        .Where(a => model.search == null || string.IsNullOrEmpty(model.search.value) ? true : a.Description.Contains(model.search.value));
+
+            List<ProductGroupModel> productGroups = await query
+                        .Skip(model.start)
+                        .Take(model.length)
+                        .ProjectTo<ProductGroupModel>(_mapper.ConfigurationProvider)
+                        .ToListAsync();
+
+            return Json(new
+            {
+                // this is what datatables wants sending back
+                model.draw,
+                recordsTotal = productGroups.Count,
+                recordsFiltered = await query.CountAsync(),
+                data = productGroups.Select(a => new
+                {
+                    id = a.Id,
+                    description = a.Description,
+                    code = a.Code,
+                    active = a.Active
+                })
+            });
+        }
+
         // GET: ProductGroups/Details/5
+        [Route("{id?}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -69,6 +102,7 @@ namespace SomeCommerce.Web.Controllers
         }
 
         // GET: ProductGroups/Edit/5
+        [Route("{id?}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -87,7 +121,7 @@ namespace SomeCommerce.Web.Controllers
         // POST: ProductGroups/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("{id:int}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Code,Active")] ProductGroup productGroup)
         {
@@ -120,6 +154,7 @@ namespace SomeCommerce.Web.Controllers
         }
 
         // GET: ProductGroups/Delete/5
+        [Route("{id?}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -138,6 +173,7 @@ namespace SomeCommerce.Web.Controllers
         }
 
         // POST: ProductGroups/Delete/5
+        [Route("{id:int}")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
